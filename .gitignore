@@ -1,0 +1,16 @@
+# account credentials: local only, never commit real values
+script/token
+script/timeshift
+
+# python
+__pycache__/
+*.pyc
+
+# virtualenvs
+.venv/
+
+# editor / os junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
