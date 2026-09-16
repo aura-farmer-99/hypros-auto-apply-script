@@ -47,6 +47,18 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 
+def read_token_and_shift(line_number):
+    token = linecache.getline("token.txt", line_number).strip()
+    if not token:
+        print(col_r + "❌ No token on that line" + Fore.RESET)
+        sys.exit(1)
+    try:
+        shift_ms = float(linecache.getline("timeshift.txt", line_number).strip())
+    except:
+        shift_ms = 0.0
+    return token, shift_ms / 1000  # ms -> seconds
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Xiaomi Bootloader Unlock Script")
     parser.add_argument("--test", action="store_true",
