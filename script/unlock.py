@@ -59,6 +59,15 @@ def read_token_and_shift(line_number):
     return token, shift_ms / 1000  # ms -> seconds
 
 
+def generate_device_id():
+    seed = f"{random.random()}-{time.time()}-{random.randint(1, 10000)}"
+    return hashlib.sha1(seed.encode("utf-8")).hexdigest().upper()
+
+
+def make_cookie(token, device_id):
+    return f"new_bbs_serviceToken={token};versionCode=500411;versionName=5.4.11;deviceId={device_id};"
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Xiaomi Bootloader Unlock Script")
     parser.add_argument("--test", action="store_true",
