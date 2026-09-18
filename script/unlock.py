@@ -68,6 +68,29 @@ def make_cookie(token, device_id):
     return f"new_bbs_serviceToken={token};versionCode=500411;versionName=5.4.11;deviceId={device_id};"
 
 
+class Session:
+    def __init__(self):
+        self.http = urllib3.PoolManager(maxsize=5, timeout=urllib3.Timeout(connect=1.5, read=5.0))
+
+    def request(self, method, url, headers):
+        request_headers = dict(headers)
+        request_headers.update({
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip, deflate",
+            "Origin": "https://i.mi.com",
+            "Referer": "https://i.mi.com/forum/",
+            "User-Agent": random.choice(USER_AGENTS),
+            "Connection": "close",
+        })
+        body = '{"is_retry":true}'.encode("utf-8") if method == "POST" else None
+        try:
+            return self.http.request(method, url, headers=request_headers, body=body, preload_content=False)
+        except Exception as exc:
+            print(col_r + f"🌐 Network error: {exc}" + Fore.RESET)
+            return None
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Xiaomi Bootloader Unlock Script")
     parser.add_argument("--test", action="store_true",
