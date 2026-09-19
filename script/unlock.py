@@ -92,31 +92,31 @@ class Session:
 
 
 def check_unlock_status(session, cookie):
-    while True:
-        response = session.request("GET", STATUS_URL, {"Cookie": cookie})
-        if response is None:
-            print(col_r + "❌ Network error - retrying in 2s" + Fore.RESET)
-            time.sleep(2)
-            continue
-        try:
-            response_data = json.loads(response.data.decode("utf-8"))
-        finally:
-            response.release_conn()
-        if response_data.get("code") == 100004:
-            print(col_rb + "❌ COOKIE EXPIRED - retrying" + Fore.RESET)
-            time.sleep(2)
-            continue
-        data = response_data.get("data", {})
-        is_pass = data.get("is_pass")
-        button_state = data.get("button_state")
-        print(col_g + f"[Account]: is_pass={is_pass}, button_state={button_state}" + Fore.RESET)
-        print(col_g + "[FULL STATUS]:" + Fore.RESET)
-        print(json.dumps(response_data, indent=2, ensure_ascii=False))
-        if is_pass == 4 and button_state in (1, 2, 3):
-            print(col_gb + "✅ READY TO SEND REQUESTS!" + Fore.RESET)
-            return True
-        print(col_r + "❌ Account not ready - exiting" + Fore.RESET)
+    response = session.request("GET", STATUS_URL, {"Cookie": cookie})
+    if response is None:
+        print(col_r + "❌ Network error - status unavailable" + Fore.RESET)
         return False
+    try:
+        response_data = json.loads(response.data.decode("utf-8"))
+    except Exception as exc:
+        print(col_r + f"❌ Status parse failed: {exc}" + Fore.RESET)
+        return False
+    finally:
+        response.release_conn()
+    if response_data.get("code") == 100004:
+        print(col_rb + "❌ COOKIE EXPIRED - stopping" + Fore.RESET)
+        return False
+    data = response_data.get("data", {})
+    is_pass = data.get("is_pass")
+    button_state = data.get("button_state")
+    print(col_g + f"[Account]: is_pass={is_pass}, button_state={button_state}" + Fore.RESET)
+    print(col_g + "[FULL STATUS]:" + Fore.RESET)
+    print(json.dumps(response_data, indent=2, ensure_ascii=False))
+    if is_pass == 4 and button_state in (1, 2, 3):
+        print(col_gb + "✅ READY TO SEND REQUESTS!" + Fore.RESET)
+        return True
+    print(col_r + "❌ Account not ready - exiting" + Fore.RESET)
+    return False
 
 
 def parse_args():
