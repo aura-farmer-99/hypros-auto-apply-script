@@ -25,6 +25,8 @@ col_yb = Style.BRIGHT + Fore.YELLOW
 col_r = Fore.RED
 col_rb = Style.BRIGHT + Fore.RED
 
+BEIJING_TZ = pytz.timezone("Asia/Shanghai")
+
 script_version = "flow-fixed-v1"
 
 STATUS_URL = "https://sgp-api.buy.mi.com/bbs/api/global/user/bl-switch/state"
@@ -66,6 +68,18 @@ def generate_device_id():
 
 def make_cookie(token, device_id):
     return f"new_bbs_serviceToken={token};versionCode=500411;versionName=5.4.11;deviceId={device_id};"
+
+
+def fetch_beijing_time():
+    client = ntplib.NTPClient()
+    for server in NTP_SERVERS:
+        try:
+            response = client.request(server, version=3)
+            return datetime.fromtimestamp(response.tx_time, timezone.utc).astimezone(BEIJING_TZ)
+        except:
+            pass
+    print(col_r + "❌ All ntp servers failed" + Fore.RESET)
+    return None
 
 
 class Session:
