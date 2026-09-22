@@ -76,9 +76,9 @@ def fetch_beijing_time():
         try:
             response = client.request(server, version=3)
             return datetime.fromtimestamp(response.tx_time, timezone.utc).astimezone(BEIJING_TZ)
-        except:
-            pass
-    print(col_r + "❌ All ntp servers failed" + Fore.RESET)
+        except Exception as exc:
+            print(col_y + f"server {server} failed: {exc}" + Fore.RESET)
+    print(col_r + "❌ All NTP servers failed" + Fore.RESET)
     return None
 
 
