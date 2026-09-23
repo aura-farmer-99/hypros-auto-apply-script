@@ -82,6 +82,10 @@ def fetch_beijing_time():
     return None
 
 
+def synced_beijing_time(origin_beijing, origin_counter):
+    return origin_beijing + timedelta(seconds=time.time() - origin_counter)
+
+
 class Session:
     def __init__(self):
         self.http = urllib3.PoolManager(maxsize=5, timeout=urllib3.Timeout(connect=1.5, read=5.0))
