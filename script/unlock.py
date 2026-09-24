@@ -86,6 +86,20 @@ def synced_beijing_time(origin_beijing, origin_counter):
     return origin_beijing + timedelta(seconds=time.time() - origin_counter)
 
 
+def wait_for_window(origin_beijing, origin_counter, shift_seconds):
+    target = (origin_beijing + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    target += timedelta(seconds=5)
+    target -= timedelta(seconds=shift_seconds)
+    print(col_yb + "⏳ Waiting for the daily reset..." + Fore.RESET)
+    while True:
+        now = synced_beijing_time(origin_beijing, origin_counter)
+        remaining = (target - now).total_seconds()
+        if remaining <= 0:
+            print(col_gb + "🚀 Flood window open" + Fore.RESET)
+            return now
+        time.sleep(min(0.1, remaining - 0.4) if remaining > 1 else 0.001)
+
+
 class Session:
     def __init__(self):
         self.http = urllib3.PoolManager(maxsize=5, timeout=urllib3.Timeout(connect=1.5, read=5.0))
