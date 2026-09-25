@@ -88,7 +88,6 @@ def synced_beijing_time(origin_beijing, origin_counter):
 
 def wait_for_window(origin_beijing, origin_counter, shift_seconds):
     target = (origin_beijing + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    target += timedelta(seconds=5)
     target -= timedelta(seconds=shift_seconds)
     print(col_yb + "⏳ Waiting for the daily reset..." + Fore.RESET)
     while True:
