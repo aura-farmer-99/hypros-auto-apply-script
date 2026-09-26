@@ -150,6 +150,33 @@ def check_unlock_status(session, cookie):
     return False
 
 
+def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
+    max_requests = 10
+    print(col_yb + f"{'🔥 TEST' if test else '🚀 LIVE'} BURST: {max_requests} requests max" + Fore.RESET)
+    for _ in range(max_requests):
+        request_time = datetime.now(BEIJING_TZ) if test else synced_beijing_time(origin_beijing, origin_counter)
+        print(col_g + f"[📡 REQ {request_time.strftime('%H:%M:%S.%f')}]" + Fore.RESET)
+        response = session.request("POST", APPLY_URL, {"Cookie": cookie})
+        if not response:
+            time.sleep(0.1 if test else 0.01)
+            continue
+        try:
+            response_data = json.loads(response.data.decode("utf-8"))
+        finally:
+            response.release_conn()
+        print(col_g + "[FULL RESPONSE]:" + Fore.RESET)
+        print(json.dumps(response_data, indent=2, ensure_ascii=False))
+        code = response_data.get("code")
+        data = response_data.get("data", {})
+        apply_result = data.get("apply_result")
+        if code == 0 and apply_result == 1:
+            print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
+            return check_unlock_status(session, cookie)
+        time.sleep(0.1 if test else 0.01)
+    print(col_g + f"✅ Burst complete: {max_requests} requests sent" + Fore.RESET)
+    return False
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Xiaomi Bootloader Unlock Script")
     parser.add_argument("--test", action="store_true",
