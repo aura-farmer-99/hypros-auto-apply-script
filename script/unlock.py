@@ -158,7 +158,7 @@ def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
         print(col_g + f"[📡 REQ {request_time.strftime('%H:%M:%S.%f')}]" + Fore.RESET)
         response = session.request("POST", APPLY_URL, {"Cookie": cookie})
         if not response:
-            time.sleep(0.1 if test else 0.01)
+            time.sleep(0.1 if test else random.uniform(0.005, 0.015))
             continue
         try:
             response_data = json.loads(response.data.decode("utf-8"))
@@ -172,7 +172,7 @@ def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
         if code == 0 and apply_result == 1:
             print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
             return check_unlock_status(session, cookie)
-        time.sleep(0.1 if test else 0.01)
+        time.sleep(0.1 if test else random.uniform(0.005, 0.015))
     print(col_g + f"✅ Burst complete: {max_requests} requests sent" + Fore.RESET)
     return False
 
