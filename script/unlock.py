@@ -172,6 +172,11 @@ def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
         if code == 0 and apply_result == 1:
             print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
             return check_unlock_status(session, cookie)
+        if code == 0 and apply_result in (3, 4):
+            print(col_y + f"⏰ Blocked until {data.get('deadline_format', 'unknown')}" + Fore.RESET)
+        if code == 100003:
+            print(col_y + "🔄 Possible approval - checking status..." + Fore.RESET)
+            return check_unlock_status(session, cookie)
         time.sleep(0.1 if test else random.uniform(0.005, 0.015))
     print(col_g + f"✅ Burst complete: {max_requests} requests sent" + Fore.RESET)
     return False
