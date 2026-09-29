@@ -189,3 +189,38 @@ def parse_args():
     return parser.parse_args()
 
 
+def main():
+    args = parse_args()
+    token_number = int(input(col_g + "[Token line number]: " + Fore.RESET))
+
+    token, shift_seconds = read_token_and_shift(token_number)
+    clear_screen()
+
+    print(col_yb + f"{script_version}_token_#{token_number}:" + Fore.RESET)
+    if args.test:
+        print(col_yb + "[TEST MODE ACTIVE - SENDS NOW]" + Fore.RESET)
+    print(col_y + "Checking account status..." + Fore.RESET)
+
+    session = Session()
+    cookie = make_cookie(token, generate_device_id())
+
+    print(col_y + "\n🔍 Checking account status (1 attempt)..." + Fore.RESET)
+    if not check_unlock_status(session, cookie):
+        input(col_r + "\n❌ Status check failed. Press Enter to exit..." + Fore.RESET)
+        return
+
+    if args.test:
+        print(col_yb + "\n=== 🚀 TEST MODE: Sending NOW ===" + Fore.RESET)
+        send_burst(session, cookie, test=True)
+    else:
+        origin_beijing = fetch_beijing_time()
+        origin_counter = time.time()
+        wait_for_window(origin_beijing, origin_counter, shift_seconds)
+        send_burst(session, cookie, test=False,
+                   origin_beijing=origin_beijing, origin_counter=origin_counter)
+
+    input(col_y + "\n👉 Press Enter to exit..." + Fore.RESET)
+
+
+if __name__ == "__main__":
+    main()
