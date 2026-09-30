@@ -186,12 +186,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Xiaomi Bootloader Unlock Script")
     parser.add_argument("--test", action="store_true",
                         help="send requests now, without waiting for 00:00 Beijing time")
+    parser.add_argument("--token", type=int, help="token line number to use")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    token_number = int(input(col_g + "[Token line number]: " + Fore.RESET))
+    if args.token:
+        token_number = args.token
+    else:
+        token_number = int(input(col_g + "[Token line number]: " + Fore.RESET))
 
     token, shift_seconds = read_token_and_shift(token_number)
     clear_screen()
