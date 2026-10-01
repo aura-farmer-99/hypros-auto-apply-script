@@ -5,9 +5,19 @@ import linecache
 import os
 import platform
 import random
+import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
+
+for package_name in ("ntplib", "pytz", "urllib3", "icmplib", "colorama", "linecache"):
+    try:
+        __import__(package_name)
+    except ImportError:
+        print(f"Installing package {package_name}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+
+os.system("cls" if os.name == "nt" else "clear")
 
 import ntplib
 import pytz
