@@ -42,6 +42,8 @@ script_version = "flow-fixed-v1"
 STATUS_URL = "https://sgp-api.buy.mi.com/bbs/api/global/user/bl-switch/state"
 APPLY_URL = "https://sgp-api.buy.mi.com/bbs/api/global/apply/bl-auth"
 
+RETRY_BODY = b'{"is_retry":true}'
+
 NTP_SERVERS = [
     "ntp0.ntp-servers.net", "ntp1.ntp-servers.net", "ntp2.ntp-servers.net",
     "ntp3.ntp-servers.net", "ntp4.ntp-servers.net", "ntp5.ntp-servers.net",
@@ -111,11 +113,14 @@ def wait_for_window(origin_beijing, origin_counter, shift_seconds):
 
 class Session:
     def __init__(self):
-        self.http = urllib3.PoolManager(maxsize=5, timeout=urllib3.Timeout(connect=1.5, read=5.0))
+        self._http = urllib3.PoolManager(
+            maxsize=5,
+            retries=urllib3.Retry(total=1, backoff_factor=0.1),
+            timeout=urllib3.Timeout(connect=1.5, read=5.0),
+        )
 
     def request(self, method, url, headers):
-        request_headers = dict(headers)
-        request_headers.update({
+        headers = {
             "Content-Type": "application/json; charset=utf-8",
             "Accept": "application/json",
             "Accept-Encoding": "gzip, deflate",
@@ -123,10 +128,16 @@ class Session:
             "Referer": "https://i.mi.com/forum/",
             "User-Agent": random.choice(USER_AGENTS),
             "Connection": "close",
-        })
-        body = '{"is_retry":true}'.encode("utf-8") if method == "POST" else None
+            **headers,
+        }
         try:
-            return self.http.request(method, url, headers=request_headers, body=body, preload_content=False)
+            return self._http.request(
+                method,
+                url,
+                headers=headers,
+                body=RETRY_BODY if method == "POST" else None,
+                preload_content=False,
+            )
         except Exception as exc:
             print(col_r + f"🌐 Network error: {exc}" + Fore.RESET)
             return None
