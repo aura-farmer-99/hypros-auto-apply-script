@@ -143,30 +143,42 @@ class Session:
             return None
 
 
-def check_unlock_status(session, cookie):
-    response = session.request("GET", STATUS_URL, {"Cookie": cookie})
+def fetch_json(session, method, url, cookie):
+    response = session.request(method, url, {"Cookie": cookie})
     if response is None:
-        print(col_r + "❌ Network error - status unavailable" + Fore.RESET)
-        return False
+        return None
     try:
-        response_data = json.loads(response.data.decode("utf-8"))
-    except Exception as exc:
-        print(col_r + f"❌ Status parse failed: {exc}" + Fore.RESET)
-        return False
+        return json.loads(response.data.decode("utf-8"))
     finally:
         response.release_conn()
-    if response_data.get("code") == 100004:
-        print(col_rb + "❌ COOKIE EXPIRED - stopping" + Fore.RESET)
+
+
+def check_unlock_status(session, cookie):
+    try:
+        response_data = fetch_json(session, "GET", STATUS_URL, cookie)
+    except Exception as exc:
+        print(col_r + f"❌ Status check failed: {exc}" + Fore.RESET)
         return False
+    if response_data is None:
+        print(col_r + "❌ Network error - status unavailable" + Fore.RESET)
+        return False
+
+    if response_data.get("code") == 100004:
+        print(col_rb + "❌ COOKIE EXPIRED - STOPPING" + Fore.RESET)
+        return False
+
     data = response_data.get("data", {})
     is_pass = data.get("is_pass")
     button_state = data.get("button_state")
+
     print(col_g + f"[Account]: is_pass={is_pass}, button_state={button_state}" + Fore.RESET)
     print(col_g + "[FULL STATUS]:" + Fore.RESET)
     print(json.dumps(response_data, indent=2, ensure_ascii=False))
+
     if is_pass == 4 and button_state in (1, 2, 3):
         print(col_gb + "✅ READY TO SEND REQUESTS!" + Fore.RESET)
         return True
+
     print(col_r + "❌ Account not ready - exiting" + Fore.RESET)
     return False
 
@@ -174,32 +186,32 @@ def check_unlock_status(session, cookie):
 def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
     max_requests = 10
     print(col_yb + f"{'🔥 TEST' if test else '🚀 LIVE'} BURST: {max_requests} requests max" + Fore.RESET)
+    sent = 0
     for _ in range(max_requests):
+        sent += 1
         request_time = datetime.now(BEIJING_TZ) if test else synced_beijing_time(origin_beijing, origin_counter)
         print(col_g + f"[📡 REQ {request_time.strftime('%H:%M:%S.%f')}]" + Fore.RESET)
-        response = session.request("POST", APPLY_URL, {"Cookie": cookie})
-        if not response:
-            time.sleep(0.1 if test else random.uniform(0.005, 0.015))
-            continue
         try:
-            response_data = json.loads(response.data.decode("utf-8"))
-        finally:
-            response.release_conn()
-        print(col_g + "[FULL RESPONSE]:" + Fore.RESET)
-        print(json.dumps(response_data, indent=2, ensure_ascii=False))
-        code = response_data.get("code")
-        data = response_data.get("data", {})
-        apply_result = data.get("apply_result")
-        if code == 0 and apply_result == 1:
-            print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
-            return check_unlock_status(session, cookie)
-        if code == 0 and apply_result in (3, 4):
-            print(col_y + f"⏰ Blocked until {data.get('deadline_format', 'unknown')}" + Fore.RESET)
-        if code == 100003:
-            print(col_y + "🔄 Possible approval - checking status..." + Fore.RESET)
-            return check_unlock_status(session, cookie)
+            response_data = fetch_json(session, "POST", APPLY_URL, cookie)
+        except Exception as exc:
+            print(col_r + f"❌ Parse error: {exc}" + Fore.RESET)
+            response_data = None
+        if response_data is not None:
+            print(col_g + "[FULL RESPONSE]:" + Fore.RESET)
+            print(json.dumps(response_data, indent=2, ensure_ascii=False))
+            code = response_data.get("code")
+            data = response_data.get("data", {})
+            apply_result = data.get("apply_result")
+            if code == 0 and apply_result == 1:
+                print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
+                return check_unlock_status(session, cookie)
+            if code == 0 and apply_result in (3, 4):
+                print(col_y + f"⏰ Blocked until {data.get('deadline_format', 'unknown')}" + Fore.RESET)
+            if code == 100003:
+                print(col_y + "🔄 Possible approval - checking status..." + Fore.RESET)
+                return check_unlock_status(session, cookie)
         time.sleep(0.1 if test else random.uniform(0.005, 0.015))
-    print(col_g + f"✅ Burst complete: {max_requests} requests sent" + Fore.RESET)
+    print(col_g + f"✅ Burst complete: {sent} requests sent" + Fore.RESET)
     return False
 
 
