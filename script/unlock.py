@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 for package_name in ("ntplib", "pytz", "urllib3", "icmplib", "colorama", "linecache"):
     try:
@@ -39,17 +40,26 @@ BEIJING_TZ = pytz.timezone("Asia/Shanghai")
 
 script_version = "flow-fixed-v1"
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+TOKEN_FILE = SCRIPT_DIR / "token"
+TIMESHIFT_FILE = SCRIPT_DIR / "timeshift"
+
 STATUS_URL = "https://sgp-api.buy.mi.com/bbs/api/global/user/bl-switch/state"
 APPLY_URL = "https://sgp-api.buy.mi.com/bbs/api/global/apply/bl-auth"
 
+# payload echoed back by every apply call
 RETRY_BODY = b'{"is_retry":true}'
 
+MAX_REQUESTS = 10
+
+# public ntp pool used for beijing time sync
 NTP_SERVERS = [
     "ntp0.ntp-servers.net", "ntp1.ntp-servers.net", "ntp2.ntp-servers.net",
     "ntp3.ntp-servers.net", "ntp4.ntp-servers.net", "ntp5.ntp-servers.net",
     "ntp6.ntp-servers.net",
 ]
 
+# rotating client fingerprints
 USER_AGENTS = [
     "okhttp/4.12.0",
     "okhttp/4.11.0 (Linux; Android 14)",
@@ -62,12 +72,9 @@ def clear_screen():
 
 
 def read_token_and_shift(line_number):
-    token = linecache.getline("token.txt", line_number).strip()
-    if not token:
-        print(col_r + "❌ No token on that line" + Fore.RESET)
-        sys.exit(1)
+    token = linecache.getline(str(TOKEN_FILE), line_number).strip()
     try:
-        shift_ms = float(linecache.getline("timeshift.txt", line_number).strip())
+        shift_ms = float(linecache.getline(str(TIMESHIFT_FILE), line_number).strip())
     except:
         shift_ms = 0.0
     return token, shift_ms / 1000  # ms -> seconds
