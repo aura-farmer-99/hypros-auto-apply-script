@@ -3,7 +3,6 @@ import hashlib
 import json
 import linecache
 import os
-import platform
 import random
 import subprocess
 import sys
@@ -11,7 +10,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-for package_name in ("ntplib", "pytz", "urllib3", "icmplib", "colorama", "linecache"):
+for package_name in ("ntplib", "pytz", "urllib3", "colorama"):
     try:
         __import__(package_name)
     except ImportError:
@@ -23,7 +22,6 @@ os.system("cls" if os.name == "nt" else "clear")
 import ntplib
 import pytz
 import urllib3
-from icmplib import ping
 from colorama import Fore, Style, init
 
 init(autoreset=True)
