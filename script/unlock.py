@@ -71,6 +71,8 @@ def clear_screen():
 
 def read_token_and_shift(line_number):
     token = linecache.getline(str(TOKEN_FILE), line_number).strip()
+    if not token:
+        sys.exit(f"❌ No token found on line {line_number} of {TOKEN_FILE}")
     try:
         shift_ms = float(linecache.getline(str(TIMESHIFT_FILE), line_number).strip())
     except:
