@@ -75,9 +75,9 @@ def read_token_and_shift(line_number):
         sys.exit(f"❌ No token found on line {line_number} of {TOKEN_FILE}")
     try:
         shift_ms = float(linecache.getline(str(TIMESHIFT_FILE), line_number).strip())
-    except:
+    except ValueError:
         shift_ms = 0.0
-    return token, shift_ms / 1000  # ms -> seconds
+    return token, shift_ms / 1000
 
 
 def generate_device_id():
