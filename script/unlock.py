@@ -69,6 +69,9 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 
+clear_screen()
+
+
 def read_token_and_shift(line_number):
     token = linecache.getline(str(TOKEN_FILE), line_number).strip()
     if not token:
