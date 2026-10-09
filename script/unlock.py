@@ -17,8 +17,6 @@ for package_name in ("ntplib", "pytz", "urllib3", "colorama"):
         print(f"Installing package {package_name}...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
 
-os.system("cls" if os.name == "nt" else "clear")
-
 import ntplib
 import pytz
 import urllib3
@@ -36,7 +34,7 @@ col_rb = Style.BRIGHT + Fore.RED
 
 BEIJING_TZ = pytz.timezone("Asia/Shanghai")
 
-script_version = "flow-fixed-v1"
+SCRIPT_VERSION = "flow-fixed-v2"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 TOKEN_FILE = SCRIPT_DIR / "token"
@@ -243,7 +241,7 @@ def main():
     token, shift_seconds = read_token_and_shift(token_number)
     clear_screen()
 
-    print(col_yb + f"{script_version}_token_#{token_number}:" + Fore.RESET)
+    print(col_yb + f"{SCRIPT_VERSION}_token_#{token_number}:" + Fore.RESET)
     if args.test:
         print(col_yb + "[TEST MODE ACTIVE - SENDS NOW]" + Fore.RESET)
     print(col_y + "Checking account status..." + Fore.RESET)
@@ -261,6 +259,9 @@ def main():
         send_burst(session, cookie, test=True)
     else:
         origin_beijing = fetch_beijing_time()
+        if origin_beijing is None:
+            input(col_rb + "\n❌ NTP failed - cannot sync time. Press Enter to exit..." + Fore.RESET)
+            return
         origin_counter = time.time()
         wait_for_window(origin_beijing, origin_counter, shift_seconds)
         send_burst(session, cookie, test=False,
