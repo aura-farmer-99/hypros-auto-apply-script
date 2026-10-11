@@ -107,19 +107,21 @@ def synced_beijing_time(origin_beijing, origin_counter):
 
 
 def wait_for_window(origin_beijing, origin_counter, shift_seconds):
-    target = (origin_beijing + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    target -= timedelta(seconds=shift_seconds)
-    print(col_y + "\n🎯 Targeting China 00:00:00 (India 9:30 PM IST)" + Fore.RESET)
+    target = (origin_beijing + timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    ) - timedelta(seconds=shift_seconds)
+    print(col_y + "\n🎯 Targeting EXACT China 00:00:00 (India 9:30 PM IST)" + Fore.RESET)
     print(col_gb + "[Offset]: " + Fore.RESET + f"{shift_seconds * 1000:.0f}ms from timeshift")
     print(col_gb + "[FLOOD STARTS]: " + Fore.RESET + target.strftime("%Y-%m-%d %H:%M:%S.%f") + " Beijing")
     print(col_yb + "⏳ Waiting... Do NOT close window!" + Fore.RESET)
+
     while True:
         now = synced_beijing_time(origin_beijing, origin_counter)
         remaining = (target - now).total_seconds()
         if remaining <= 0:
             print(col_gb + "🚀 FLOOD WINDOW OPEN - BURSTING..." + Fore.RESET)
             return now
-        time.sleep(min(0.1, remaining - 0.4) if remaining > 1 else 0.001)
+        time.sleep(min(0.1, remaining - 0.9) if remaining > 1 else 0.001)
 
 
 class Session:
