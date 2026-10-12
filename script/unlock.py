@@ -43,19 +43,16 @@ TIMESHIFT_FILE = SCRIPT_DIR / "timeshift"
 STATUS_URL = "https://sgp-api.buy.mi.com/bbs/api/global/user/bl-switch/state"
 APPLY_URL = "https://sgp-api.buy.mi.com/bbs/api/global/apply/bl-auth"
 
-# payload echoed back by every apply call
 RETRY_BODY = b'{"is_retry":true}'
 
 MAX_REQUESTS = 10
 
-# public ntp pool used for beijing time sync
 NTP_SERVERS = [
     "ntp0.ntp-servers.net", "ntp1.ntp-servers.net", "ntp2.ntp-servers.net",
     "ntp3.ntp-servers.net", "ntp4.ntp-servers.net", "ntp5.ntp-servers.net",
     "ntp6.ntp-servers.net",
 ]
 
-# rotating client fingerprints
 USER_AGENTS = [
     "okhttp/4.12.0",
     "okhttp/4.11.0 (Linux; Android 14)",
