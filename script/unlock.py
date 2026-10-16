@@ -194,24 +194,29 @@ def check_unlock_status(session, cookie):
 
 
 def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
-    max_requests = 10
-    print(col_yb + f"{'🔥 TEST' if test else '🚀 LIVE'} BURST: {max_requests} requests max" + Fore.RESET)
-    sent = 0
-    for _ in range(max_requests):
-        sent += 1
-        request_time = datetime.now(BEIJING_TZ) if test else synced_beijing_time(origin_beijing, origin_counter)
+    print(col_yb + f"\n{'🔥 TEST' if test else '🚀 LIVE'} BURST: {MAX_REQUESTS} requests max" + Fore.RESET)
+
+    for _ in range(MAX_REQUESTS):
+        if test:
+            request_time = datetime.now(BEIJING_TZ)
+        else:
+            request_time = synced_beijing_time(origin_beijing, origin_counter)
         print(col_g + f"[📡 REQ {request_time.strftime('%H:%M:%S.%f')}]" + Fore.RESET)
+
         try:
             response_data = fetch_json(session, "POST", APPLY_URL, cookie)
         except Exception as exc:
             print(col_r + f"❌ Parse error: {exc}" + Fore.RESET)
             response_data = None
+
         if response_data is not None:
             print(col_g + "[FULL RESPONSE]:" + Fore.RESET)
             print(json.dumps(response_data, indent=2, ensure_ascii=False))
+
             code = response_data.get("code")
             data = response_data.get("data", {})
             apply_result = data.get("apply_result")
+
             if code == 0 and apply_result == 1:
                 print(col_gb + "🎉 APPROVED! Checking status..." + Fore.RESET)
                 return check_unlock_status(session, cookie)
@@ -220,8 +225,10 @@ def send_burst(session, cookie, test, origin_beijing=None, origin_counter=None):
             if code == 100003:
                 print(col_y + "🔄 Possible approval - checking status..." + Fore.RESET)
                 return check_unlock_status(session, cookie)
+
         time.sleep(0.1 if test else random.uniform(0.005, 0.015))
-    print(col_g + f"✅ Burst complete: {sent} requests sent" + Fore.RESET)
+
+    print(col_g + f"✅ Burst complete: {MAX_REQUESTS} requests sent" + Fore.RESET)
     return False
 
 
