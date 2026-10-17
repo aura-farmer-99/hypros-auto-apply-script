@@ -25,8 +25,6 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 col_g = Fore.GREEN
 col_gb = Style.BRIGHT + Fore.GREEN
-col_b = Fore.BLUE
-col_bb = Style.BRIGHT + Fore.BLUE
 col_y = Fore.YELLOW
 col_yb = Style.BRIGHT + Fore.YELLOW
 col_r = Fore.RED
