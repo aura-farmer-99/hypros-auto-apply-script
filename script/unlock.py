@@ -1,3 +1,4 @@
+"""Xiaomi bootloader unlock slot grabber."""
 import argparse
 import hashlib
 import json
@@ -10,12 +11,12 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-for package_name in ("ntplib", "pytz", "urllib3", "colorama"):
+for package in ("ntplib", "pytz", "urllib3", "colorama"):
     try:
-        __import__(package_name)
+        __import__(package)
     except ImportError:
-        print(f"Installing package {package_name}...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+        print(f"Installing package {package}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 import ntplib
 import pytz
@@ -31,8 +32,7 @@ col_r = Fore.RED
 col_rb = Style.BRIGHT + Fore.RED
 
 BEIJING_TZ = pytz.timezone("Asia/Shanghai")
-
-SCRIPT_VERSION = "flow-fixed-v2"
+SCRIPT_VERSION = "flow-fixed-v2-9:30PM"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 TOKEN_FILE = SCRIPT_DIR / "token"
@@ -40,9 +40,7 @@ TIMESHIFT_FILE = SCRIPT_DIR / "timeshift"
 
 STATUS_URL = "https://sgp-api.buy.mi.com/bbs/api/global/user/bl-switch/state"
 APPLY_URL = "https://sgp-api.buy.mi.com/bbs/api/global/apply/bl-auth"
-
 RETRY_BODY = b'{"is_retry":true}'
-
 MAX_REQUESTS = 10
 
 NTP_SERVERS = [
