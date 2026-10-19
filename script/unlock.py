@@ -238,7 +238,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.token:
+
+    if args.token is not None:
         token_number = args.token
     else:
         token_number = int(input(col_g + "[Token line number]: " + Fore.RESET))
